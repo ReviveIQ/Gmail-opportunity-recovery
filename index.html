@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gmail Opportunity Recovery — ReviveIQ</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #080f1e;
+    --navy-2: #0f172a;
+    --navy-3: #1e3a5f;
+    --blue: #2563eb;
+    --blue-2: #3b82f6;
+    --blue-3: #60a5fa;
+    --blue-4: #93c5fd;
+    --muted: #475569;
+    --muted-2: #64748b;
+    --border: rgba(255,255,255,0.08);
+    --green: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--navy);
+    color: #e2e8f0;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── header ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(8,15,30,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .wordmark { display: flex; align-items: center; gap: 10px; }
+  .wordmark-gem { width: 28px; height: 28px; }
+  .wordmark-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 15px; color: white; letter-spacing: -0.02em; }
+  .wordmark-text span { color: var(--blue-3); }
+
+  .header-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--blue-3);
+    background: rgba(37,99,235,0.12);
+    border: 1px solid rgba(37,99,235,0.25);
+    padding: 4px 12px;
+    border-radius: 99px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ── hero ── */
+  .hero {
+    padding: 64px 40px 48px;
+    border-bottom: 1px solid var(--border);
+    max-width: 900px;
+  }
+
+  .hero-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--blue-3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero-label::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 1px;
+    background: var(--blue-3);
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(32px, 5vw, 52px);
+    color: white;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  h1 em { color: var(--blue-3); font-style: normal; }
+
+  .hero-sub {
+    font-size: 17px;
+    color: var(--muted-2);
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  /* ── metrics bar ── */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .metric {
+    padding: 28px 32px;
+    border-right: 1px solid var(--border);
+  }
+
+  .metric:last-child { border-right: none; }
+
+  .metric-n {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    color: white;
+    letter-spacing: -0.03em;
+    margin-bottom: 4px;
+  }
+
+  .metric-l {
+    font-size: 12px;
+    color: var(--muted-2);
+    letter-spacing: 0.02em;
+  }
+
+  /* ── main layout ── */
+  .main {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: calc(100vh - 200px);
+  }
+
+  /* ── nav ── */
+  nav {
+    border-right: 1px solid var(--border);
+    padding: 32px 0;
+    position: sticky;
+    top: 65px;
+    height: calc(100vh - 65px);
+    overflow-y: auto;
+  }
+
+  .nav-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0 24px;
+    margin-bottom: 8px;
+    margin-top: 24px;
+  }
+
+  .nav-label:first-child { margin-top: 0; }
+
+  nav a {
+    display: block;
+    padding: 8px 24px;
+    font-size: 13px;
+    color: var(--muted-2);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  nav a:hover, nav a.active {
+    color: white;
+    border-left-color: var(--blue-2);
+    background: rgba(37,99,235,0.08);
+  }
+
+  /* ── content ── */
+  .content {
+    padding: 40px 48px;
+    max-width: 760px;
+  }
+
+  section {
+    margin-bottom: 56px;
+    scroll-margin-top: 90px;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--blue-3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: white;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--blue-4);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+    margin-top: 24px;
+  }
+
+  p { color: #94a3b8; font-size: 14px; line-height: 1.7; margin-bottom: 12px; }
+
+  /* ── cards ── */
+  .card {
+    background: var(--navy-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: white;
+    margin-bottom: 6px;
+  }
+
+  .card-sub { font-size: 13px; color: var(--muted-2); margin-bottom: 0; }
+
+  /* ── decision tree ── */
+  .tree {
+    background: var(--navy-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 16px;
+  }
+
+  .tree-question {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: white;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tree-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .tree-yes {
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #34d399;
+    font-weight: 500;
+  }
+
+  .tree-no {
+    background: rgba(100,116,139,0.1);
+    border: 1px solid rgba(100,116,139,0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--muted-2);
+    font-weight: 500;
+  }
+
+  .tree-then {
+    font-size: 13px;
+    color: #94a3b8;
+    padding-left: 12px;
+    border-left: 2px solid rgba(255,255,255,0.1);
+  }
+
+  /* ── steps ── */
+  .steps { display: flex; flex-direction: column; gap: 0; }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .step:last-child { border-bottom: none; }
+
+  .step-n {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(37,99,235,0.2);
+    border: 1px solid rgba(37,99,235,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--blue-3);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-body { flex: 1; }
+  .step-title { font-size: 14px; font-weight: 500; color: white; margin-bottom: 3px; }
+  .step-desc { font-size: 13px; color: var(--muted-2); margin: 0; }
+
+  /* ── labels ── */
+  .labels { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+  .label-pill {
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    border: 1px solid;
+  }
+
+  .label-revenue { background: rgba(16,185,129,0.1); color: #34d399; border-color: rgba(16,185,129,0.3); }
+  .label-career { background: rgba(37,99,235,0.12); color: var(--blue-3); border-color: rgba(37,99,235,0.3); }
+  .label-network { background: rgba(124,58,237,0.12); color: #a78bfa; border-color: rgba(124,58,237,0.3); }
+  .label-reviveiq { background: rgba(245,158,11,0.1); color: #fbbf24; border-color: rgba(245,158,11,0.3); }
+  .label-action { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.3); }
+  .label-asset { background: rgba(100,116,139,0.12); color: #94a3b8; border-color: rgba(100,116,139,0.3); }
+
+  /* ── opportunity template ── */
+  .template {
+    background: var(--navy-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .template-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .template-title { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--blue-3); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .template-body { padding: 0; }
+
+  .template-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .template-row:last-child { border-bottom: none; }
+
+  .template-key {
+    padding: 12px 24px;
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted-2);
+    border-right: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .template-val {
+    padding: 12px 24px;
+    font-size: 13px;
+    color: #94a3b8;
+  }
+
+  /* ── backlog ── */
+  .checklist { list-style: none; }
+
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: #94a3b8;
+  }
+
+  .checklist li:last-child { border-bottom: none; }
+
+  .check-box {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+    margin-top: 1px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .check-box:hover { border-color: var(--blue-2); background: rgba(37,99,235,0.1); }
+  .check-box.checked { background: var(--blue-2); border-color: var(--blue-2); }
+  .check-box.checked::after { content: '✓'; font-size: 11px; color: white; }
+
+  .checked-text { text-decoration: line-through; opacity: 0.4; }
+
+  /* ── agent spec ── */
+  .agent-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .agent-card {
+    background: var(--navy-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+
+  .agent-card-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+
+  .agent-item {
+    font-size: 13px;
+    color: #94a3b8;
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .agent-item::before { content: '→'; color: var(--blue-3); font-size: 12px; }
+
+  .agent-functions {
+    counter-reset: fn;
+    list-style: none;
+  }
+
+  .agent-functions li {
+    counter-increment: fn;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: #94a3b8;
+  }
+
+  .agent-functions li:last-child { border-bottom: none; }
+
+  .agent-functions li::before {
+    content: counter(fn, decimal-leading-zero);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--blue-3);
+    background: rgba(37,99,235,0.12);
+    border: 1px solid rgba(37,99,235,0.25);
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 768px) {
+    .main { grid-template-columns: 1fr; }
+    nav { display: none; }
+    .content { padding: 24px 20px; }
+    .metrics { grid-template-columns: 1fr 1fr; }
+    .hero { padding: 40px 20px 32px; }
+    header { padding: 16px 20px; }
+    .tree-options { grid-template-columns: 1fr; }
+    .agent-grid { grid-template-columns: 1fr; }
+    .template-row { grid-template-columns: 1fr; }
+    .template-key { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">
+    <svg class="wordmark-gem" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#60a5fa"/><stop offset="100%" stop-color="#2563eb"/></linearGradient>
+        <linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#93c5fd"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient>
+        <linearGradient id="lg3" x1="100%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#1d4ed8"/><stop offset="100%" stop-color="#1e3a5f"/></linearGradient>
+      </defs>
+      <polygon points="36,4 68,36 36,68 4,36" fill="url(#lg3)" opacity="0.35"/>
+      <polygon points="36,4 20,20 36,36 52,20" fill="url(#lg2)" opacity="0.9"/>
+      <polygon points="36,4 52,20 68,36 36,36" fill="url(#lg1)" opacity="0.65"/>
+      <polygon points="4,36 20,20 36,36 20,52" fill="url(#lg1)" opacity="0.5"/>
+      <polygon points="68,36 52,20 36,36 52,52" fill="url(#lg2)" opacity="0.75"/>
+      <polygon points="36,68 20,52 36,36 52,52" fill="url(#lg3)" opacity="0.95"/>
+      <circle cx="36" cy="36" r="6" fill="white" opacity="0.95"/>
+      <circle cx="36" cy="36" r="3" fill="#93c5fd"/>
+    </svg>
+    <span class="wordmark-text">ReviveIQ <span>·</span> Gmail Recovery</span>
+  </div>
+  <span class="header-badge">Opportunity Intelligence</span>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Operating System</div>
+  <h1>Gmail <em>Opportunity</em><br>Recovery System</h1>
+  <p class="hero-sub">Transform Gmail from a communication platform into an opportunity intelligence system. Turns a one-time cleanup into a repeatable operating system.</p>
+</div>
+
+<div class="metrics">
+  <div class="metric">
+    <div class="metric-n" style="color:#ef4444">1,000+</div>
+    <div class="metric-l">Emails to process</div>
+  </div>
+  <div class="metric">
+    <div class="metric-n" style="color:#f59e0b">&lt; 100</div>
+    <div class="metric-l">Target inbox count</div>
+  </div>
+  <div class="metric">
+    <div class="metric-n" style="color:#60a5fa">6</div>
+    <div class="metric-l">Opportunity labels</div>
+  </div>
+  <div class="metric">
+    <div class="metric-n" style="color:#10b981">Weekly</div>
+    <div class="metric-l">Review cadence</div>
+  </div>
+</div>
+
+<div class="main">
+  <nav>
+    <div class="nav-label">Process</div>
+    <a href="#objectives" class="active">Objectives</a>
+    <a href="#labels">Label System</a>
+    <a href="#triage">Daily Triage</a>
+    <div class="nav-label">Reference</div>
+    <a href="#template">Opportunity Template</a>
+    <a href="#backlog">Backlog</a>
+    <div class="nav-label">Future</div>
+    <a href="#agent">AI Agent Spec</a>
+  </nav>
+
+  <div class="content">
+
+    <section id="objectives">
+      <div class="section-label">Mission</div>
+      <h2>Objectives</h2>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="card">
+          <div class="card-title">Inbox control</div>
+          <div class="card-sub">Reduce inbox to under 100 emails. Create space to see what matters.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Opportunity recovery</div>
+          <div class="card-sub">Surface hidden career, revenue, and partnership opportunities buried in old threads.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Relationship capital</div>
+          <div class="card-sub">Rebuild dormant connections — former managers, coworkers, executive contacts.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Repeatable process</div>
+          <div class="card-sub">Weekly review cadence that keeps the system running, not just a one-time cleanup.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="labels">
+      <div class="section-label">Gmail Labels</div>
+      <h2>Label System</h2>
+      <p>Apply these labels to flag emails worth acting on. Everything else gets archived or deleted.</p>
+      <div class="labels" style="margin-bottom: 24px;">
+        <span class="label-pill label-revenue">Opportunity/Revenue</span>
+        <span class="label-pill label-career">Opportunity/Career</span>
+        <span class="label-pill label-network">Opportunity/Network</span>
+        <span class="label-pill label-reviveiq">Opportunity/ReviveIQ</span>
+        <span class="label-pill label-action">Action/Follow-Up</span>
+        <span class="label-pill label-asset">Assets/Reference</span>
+      </div>
+      <div class="card">
+        <h3>When to apply each</h3>
+        <div class="step" style="border:none; padding: 8px 0;">
+          <div style="width:10px; height:10px; border-radius:50%; background:#34d399; flex-shrink:0; margin-top:5px;"></div>
+          <div class="step-body"><span class="step-title">Revenue</span> — B2B leads, partnership offers, consulting inquiries, client follow-ups</div>
+        </div>
+        <div class="step" style="border:none; padding: 8px 0;">
+          <div style="width:10px; height:10px; border-radius:50%; background:var(--blue-3); flex-shrink:0; margin-top:5px;"></div>
+          <div class="step-body"><span class="step-title">Career</span> — recruiter outreach, hiring manager contacts, referrals, job leads</div>
+        </div>
+        <div class="step" style="border:none; padding: 8px 0;">
+          <div style="width:10px; height:10px; border-radius:50%; background:#a78bfa; flex-shrink:0; margin-top:5px;"></div>
+          <div class="step-body"><span class="step-title">Network</span> — people worth reconnecting with, introductions, relationship maintenance</div>
+        </div>
+        <div class="step" style="border:none; padding: 8px 0;">
+          <div style="width:10px; height:10px; border-radius:50%; background:#fbbf24; flex-shrink:0; margin-top:5px;"></div>
+          <div class="step-body"><span class="step-title">ReviveIQ</span> — prospects, advisory contacts, potential B2B clients</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="triage">
+      <div class="section-label">Daily Process</div>
+      <h2>Daily Triage</h2>
+      <p>Every email gets one of four actions. Nothing sits untouched.</p>
+
+      <div class="steps" style="margin-bottom: 28px;">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div class="step-body">
+            <div class="step-title">Delete</div>
+            <div class="step-desc">No value, no history, no relationship. Gone.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div class="step-body">
+            <div class="step-title">Archive</div>
+            <div class="step-desc">Might need it someday. Out of inbox, still searchable.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div class="step-body">
+            <div class="step-title">Label as Opportunity</div>
+            <div class="step-desc">Apply the relevant label. This email has future value.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-n">4</div>
+          <div class="step-body">
+            <div class="step-title">Create Follow-Up</div>
+            <div class="step-desc">Action required. Label Action/Follow-Up and set a reminder.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tree">
+        <div class="tree-question">Decision tree — does this email have opportunity value?</div>
+        <p style="font-size:13px; color:var(--muted-2); margin-bottom:14px;">Ask: can this generate any of the following?</p>
+        <div class="tree-options">
+          <div class="tree-yes">💰 Revenue</div>
+          <div class="tree-yes">💼 Employment</div>
+          <div class="tree-yes">🤝 Partnership</div>
+          <div class="tree-yes">📈 Relationship Capital</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap: 12px; margin-top: 4px;">
+          <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2); border-radius:8px; padding:12px 16px;">
+            <div style="font-size:12px; font-weight:500; color:#34d399; margin-bottom:6px;">YES →</div>
+            <div class="tree-then">Apply opportunity label. Add to weekly review queue.</div>
+          </div>
+          <div style="background:rgba(100,116,139,0.08); border:1px solid rgba(100,116,139,0.15); border-radius:8px; padding:12px 16px;">
+            <div style="font-size:12px; font-weight:500; color:var(--muted-2); margin-bottom:6px;">NO →</div>
+            <div class="tree-then">Archive or delete. Remove from inbox immediately.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="template">
+      <div class="section-label">Reference</div>
+      <h2>Opportunity Template</h2>
+      <p>Use this record for every opportunity you surface. Copy into a doc or Notion page per contact.</p>
+      <div class="template">
+        <div class="template-header">
+          <span class="template-title">Opportunity Record</span>
+          <div class="labels">
+            <span class="label-pill label-career" style="font-size:11px; padding:3px 8px;">Career</span>
+            <span class="label-pill label-revenue" style="font-size:11px; padding:3px 8px;">Revenue</span>
+            <span class="label-pill label-network" style="font-size:11px; padding:3px 8px;">Network</span>
+            <span class="label-pill label-reviveiq" style="font-size:11px; padding:3px 8px;">ReviveIQ</span>
+          </div>
+        </div>
+        <div class="template-body">
+          <div class="template-row">
+            <div class="template-key">Name</div>
+            <div class="template-val" style="color:#475569; font-style:italic;">Contact full name</div>
+          </div>
+          <div class="template-row">
+            <div class="template-key">Company</div>
+            <div class="template-val" style="color:#475569; font-style:italic;">Organization or company</div>
+          </div>
+          <div class="template-row">
+            <div class="template-key">Email</div>
+            <div class="template-val" style="color:#475569; font-style:italic;">Email address</div>
+          </div>
+          <div class="template-row">
+            <div class="template-key">Type</div>
+            <div class="template-val">
+              <div class="labels">
+                <span class="label-pill label-career" style="font-size:11px; padding:3px 8px;">Career</span>
+                <span class="label-pill label-revenue" style="font-size:11px; padding:3px 8px;">Revenue</span>
+                <span class="label-pill label-network" style="font-size:11px; padding:3px 8px;">Network</span>
+                <span class="label-pill label-reviveiq" style="font-size:11px; padding:3px 8px;">ReviveIQ</span>
+              </div>
+            </div>
+          </div>
+          <div class="template-row">
+            <div class="template-key">Last Interaction</div>
+            <div class="template-val" style="color:#475569; font-style:italic;">Date of last email / conversation</div>
+          </div>
+          <div class="template-row">
+            <div class="template-key">Opportunity</div>
+            <div class="template-val" style="color:#475569; font-style:italic;">Describe the opportunity in one sentence</div>
+          </div>
+          <div class="template-row">
+            <div class="template-key">Next Action</div>
+            <div class="template-val">
+              <div class="labels">
+                <span class="label-pill label-action" style="font-size:11px; padding:3px 8px;">Reconnect</span>
+                <span class="label-pill label-action" style="font-size:11px; padding:3px 8px;">Follow Up</span>
+                <span class="label-pill label-action" style="font-size:11px; padding:3px 8px;">Schedule Meeting</span>
+                <span class="label-pill label-asset" style="font-size:11px; padding:3px 8px;">Archive</span>
+              </div>
+            </div>
+          </div>
+          <div class="template-row">
+            <div class="template-key">Status</div>
+            <div class="template-val">
+              <div class="labels">
+                <span class="label-pill label-career" style="font-size:11px; padding:3px 8px;">Active</span>
+                <span class="label-pill label-reviveiq" style="font-size:11px; padding:3px 8px;">Waiting</span>
+                <span class="label-pill label-asset" style="font-size:11px; padding:3px 8px;">Closed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="backlog">
+      <div class="section-label">Tasks</div>
+      <h2>Backlog</h2>
+
+      <h3>Inbox cleanup</h3>
+      <ul class="checklist" id="checklist">
+        <li data-id="i1"><div class="check-box" onclick="toggle(this)"></div><span>Reduce inbox from 1,000 to 500</span></li>
+        <li data-id="i2"><div class="check-box" onclick="toggle(this)"></div><span>Reduce inbox from 500 to 100</span></li>
+        <li data-id="i3"><div class="check-box" onclick="toggle(this)"></div><span>Process all unread emails</span></li>
+      </ul>
+
+      <h3>Updates cleanup</h3>
+      <ul class="checklist">
+        <li data-id="u1"><div class="check-box" onclick="toggle(this)"></div><span>Archive updates older than 2 years</span></li>
+        <li data-id="u2"><div class="check-box" onclick="toggle(this)"></div><span>Archive updates older than 1 year</span></li>
+      </ul>
+
+      <h3>Opportunity recovery</h3>
+      <ul class="checklist">
+        <li data-id="o1"><div class="check-box" onclick="toggle(this)"></div><span>Mine recruiter emails</span></li>
+        <li data-id="o2"><div class="check-box" onclick="toggle(this)"></div><span>Mine hiring manager emails</span></li>
+        <li data-id="o3"><div class="check-box" onclick="toggle(this)"></div><span>Mine referral opportunities</span></li>
+        <li data-id="o4"><div class="check-box" onclick="toggle(this)"></div><span>Mine partnership conversations</span></li>
+      </ul>
+
+      <h3>Network recovery</h3>
+      <ul class="checklist">
+        <li data-id="n1"><div class="check-box" onclick="toggle(this)"></div><span>Identify former managers</span></li>
+        <li data-id="n2"><div class="check-box" onclick="toggle(this)"></div><span>Identify former coworkers</span></li>
+        <li data-id="n3"><div class="check-box" onclick="toggle(this)"></div><span>Identify dormant executive contacts</span></li>
+      </ul>
+    </section>
+
+    <section id="agent">
+      <div class="section-label">Future State</div>
+      <h2>AI Agent Spec</h2>
+      <p>The future version of this system runs as an AI agent — ingesting Gmail, LinkedIn, and CRM data to surface opportunities automatically.</p>
+
+      <div class="agent-grid">
+        <div class="agent-card">
+          <div class="agent-card-label">Inputs</div>
+          <div class="agent-item">Gmail</div>
+          <div class="agent-item">Outlook</div>
+          <div class="agent-item">LinkedIn Messages</div>
+          <div class="agent-item">CRM Records</div>
+        </div>
+        <div class="agent-card">
+          <div class="agent-card-label">Outputs</div>
+          <div class="agent-item">Opportunity Score</div>
+          <div class="agent-item">Relationship Score</div>
+          <div class="agent-item">Follow-Up Recommendations</div>
+          <div class="agent-item">Revenue Recovery Alerts</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="agent-card-label" style="margin-bottom:12px;">Agent functions</div>
+        <ol class="agent-functions">
+          <li>Email Classification</li>
+          <li>Opportunity Detection</li>
+          <li>Relationship Mapping</li>
+          <li>Follow-Up Prioritization</li>
+          <li>Opportunity Recovery Campaigns</li>
+        </ol>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+function toggle(box) {
+  box.classList.toggle('checked');
+  const text = box.nextElementSibling;
+  text.classList.toggle('checked-text');
+  save();
+}
+
+function save() {
+  const state = {};
+  document.querySelectorAll('.check-box').forEach((b, i) => {
+    state[i] = b.classList.contains('checked');
+  });
+  try { localStorage.setItem('gmail-recovery-checks', JSON.stringify(state)); } catch(e) {}
+}
+
+function load() {
+  try {
+    const state = JSON.parse(localStorage.getItem('gmail-recovery-checks') || '{}');
+    document.querySelectorAll('.check-box').forEach((b, i) => {
+      if (state[i]) {
+        b.classList.add('checked');
+        b.nextElementSibling.classList.add('checked-text');
+      }
+    });
+  } catch(e) {}
+}
+
+load();
+
+const links = document.querySelectorAll('nav a');
+const sections = document.querySelectorAll('section[id]');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 100) current = s.id;
+  });
+  links.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+</script>
+</body>
+</html>
